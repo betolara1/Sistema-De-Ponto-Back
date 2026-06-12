@@ -64,12 +64,11 @@ public class CoordenadasService {
 
     @Transactional
     public Coordenadas update(UpdateCoordenadasRequest request, Long id){
-        Coordenadas coord = coordenadasRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Coordenadas com ID " + id + " não encontradas"));
+        Coordenadas coord = coordenadasRepository.findById(id).orElseThrow(() -> new NotFoundException("Coordenadas com ID " + id + " não encontradas"));
 
         if(request.getEmpresaId() != null){
-            Empresa empresaId = empresaRepository.findById(request.getEmpresaId())
-                .orElseThrow(() -> new NotFoundException("O ID: " + request.getEmpresaId() + " da Empresa não foi encontrado"));
+
+            Empresa empresaId = empresaRepository.findById(request.getEmpresaId()).orElseThrow(() -> new NotFoundException("O ID: " + request.getEmpresaId() + " da Empresa não foi encontrado"));
             coord.setEmpresaId(empresaId);
         }
 
