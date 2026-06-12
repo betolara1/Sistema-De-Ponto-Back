@@ -135,11 +135,29 @@ Permite definir limites e localizações geográficas para as empresas. *Observa
 | **POST** | `/coordenadas` | Vincula e cadastra novas coordenadas para uma empresa. | JSON Body (`SaveCoordenadasRequest`) |
 | **PUT** | `/coordenadas/{id}` | Atualiza as coordenadas geográficas existentes por ID da coordenada. | JSON Body (`UpdateCoordenadasRequest`), `{id}` (ID da Coordenada, Path variable) |
 
+### 👥 Colaboradores (`/colaboradores`)
+
+Permite o gerenciamento de funcionários (colaboradores) e suas respectivas associações a empresas do sistema.
+
+| Método | Endpoint | Descrição | Parâmetros de Query / Path |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/colaboradores` | Retorna lista de colaboradores paginada e ordenada. | `page` (padrão 0), `size` (padrão 10), `sortBy` (padrão `dateCreated`), `direction` (padrão `desc`) |
+| **GET** | `/colaboradores/{id}` | Busca os detalhes de um colaborador específico por ID. | `{id}` (Path variable) |
+| **GET** | `/colaboradores?nome={nome}` | Busca um colaborador por parte do nome (case-insensitive). | `nome` (String) |
+| **GET** | `/colaboradores?cpf={cpf}` | Busca um colaborador pelo CPF exato. | `cpf` (String) |
+| **GET** | `/colaboradores?empresaId={empresaId}` | Busca colaborador vinculado a um ID de empresa. | `empresaId` (Long) |
+| **GET** | `/colaboradores?active={isActive}&isActive={isActive}` | Lista colaboradores ativos ou inativos de forma paginada. | `isActive` (Boolean), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/colaboradores?dateCreated={dateString}` | Lista colaboradores pela data de criação. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/colaboradores?dataUpdated={dateString}` | Lista colaboradores pela data de atualização. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
+| **POST** | `/colaboradores` | Cadastra um novo colaborador no sistema. | JSON Body (`SaveColaboradoresRequest`) |
+| **PUT** | `/colaboradores?id={id}` | Atualiza os dados cadastrais de um colaborador existente. | JSON Body (`UpdateColaboradoresRequest`), `id` (Query param) |
+| **DELETE**| `/colaboradores/{id}` | Desativa temporariamente um colaborador (Soft Delete). | `{id}` (Path variable) |
+
 ---
 
 ## 🧪 Execução de Testes
 
-O projeto conta com testes unitários e de integração abrangentes para as camadas de Service e Controller dos recursos `Empresa` e `Coordenadas`.
+O projeto conta com testes unitários e de integração abrangentes para as camadas de Service e Controller dos recursos `Empresa`, `Coordenadas` e `Colaboradores`.
 
 Para rodar todos os testes automatizados da aplicação:
 
@@ -154,7 +172,7 @@ Para rodar todos os testes automatizados da aplicação:
 ## 📋 Próximos Passos (Roadmap de Desenvolvimento)
 
 - [ ] Criar scripts iniciais de migração de banco de dados (`V1__create_tables.sql`) em `src/main/resources/db/migration`.
-- [ ] Implementar a entidade de `Colaborador` (Funcionários).
+- [x] Implementar a entidade de `Colaborador` (Funcionários) e seus respectivos endpoints e testes.
 - [ ] Implementar a lógica de registro de ponto (entradas, saídas, intervalos).
 - [ ] Configurar conexão dedicada a banco de dados em produção (PostgreSQL/MySQL).
 - [ ] Conectar ao Eureka Server de registro de microsserviços.
