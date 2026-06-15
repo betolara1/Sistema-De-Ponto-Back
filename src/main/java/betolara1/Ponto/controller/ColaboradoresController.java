@@ -36,7 +36,7 @@ public class ColaboradoresController {
     public ResponseEntity<Page<ColaboradoresDTO>> getAll( @RequestParam(defaultValue="0") int page, 
                                                         @RequestParam(defaultValue="10") int size,
                                                         @RequestParam(defaultValue = "dateCreated") String sortBy,
-                                                        @RequestParam(defaultValue = "desc") String direction
+                                                        @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
 

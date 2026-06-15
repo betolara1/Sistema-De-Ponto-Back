@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +35,7 @@ public class CoordenadasController {
     public ResponseEntity<Page<CoordenadasDTO>> getAll( @RequestParam(defaultValue="0") int page, 
                                                     @RequestParam(defaultValue="10") int size,
                                                     @RequestParam(defaultValue = "dateCreated") String sortBy,
-                                                    @RequestParam(defaultValue = "desc") String direction
+                                                    @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
         return ResponseEntity.ok(coordenadasService.findAll(pageable));
