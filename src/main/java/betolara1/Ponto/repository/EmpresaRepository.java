@@ -24,5 +24,5 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long>{
     Empresa findByCnpjContaining(String cnpj);
 
     // busca empresas ativas
-    Page<Empresa> findByIsActive(Pageable pageable);
+    Page<Empresa> findByIsActive(Boolean isActive, Pageable pageable);
 }

@@ -93,12 +93,10 @@ public class EmpresaControllerTest {
     @Test
     void getActive_ShouldReturnPageOfEmpresaDTO() throws Exception {
         Page<EmpresaDTO> page = new PageImpl<>(Collections.singletonList(empresaDTO));
-        when(empresaService.findByIsActive(any(Pageable.class))).thenReturn(page);
+        when(empresaService.findByIsActive(eq(true), any(Pageable.class))).thenReturn(page);
 
-        // We pass active=true to route properly, and isActive=true to bind to the @RequestParam Boolean isActive.
         mockMvc.perform(get("/empresa")
                 .param("active", "true")
-                .param("isActive", "true")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeEmpresa").value("Empresa Teste"));
@@ -110,8 +108,7 @@ public class EmpresaControllerTest {
         when(empresaService.getByDateCreated(eq("2026-06-11"), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/empresa")
-                .param("dateCreated", "")
-                .param("dateString", "2026-06-11")
+                .param("dateCreated", "2026-06-11")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeEmpresa").value("Empresa Teste"));
@@ -123,8 +120,7 @@ public class EmpresaControllerTest {
         when(empresaService.getByDateUpdated(eq("2026-06-11"), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/empresa")
-                .param("dataUpdated", "")
-                .param("dateString", "2026-06-11")
+                .param("dataUpdated", "2026-06-11")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeEmpresa").value("Empresa Teste"));
@@ -183,12 +179,9 @@ public class EmpresaControllerTest {
         updatedEmpresa.setId(1L);
         updatedEmpresa.setNomeEmpresa("Empresa Atualizada");
 
-        // The controller method expects Long id without @PathVariable annotation.
-        // Therefore, we must supply 'id=1' as a query parameter in addition to the path /{id}.
         when(empresaService.update(eq(1L), any(UpdateEmpresaRequest.class))).thenReturn(updatedEmpresa);
 
         mockMvc.perform(put("/empresa/{id}", 1L)
-                .param("id", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

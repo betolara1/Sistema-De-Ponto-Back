@@ -49,18 +49,18 @@ public class EmpresaController {
     }
 
     @GetMapping(params = "active")
-    public ResponseEntity<Page<EmpresaDTO>> getActive(  @RequestParam Boolean isActive,
+    public ResponseEntity<Page<EmpresaDTO>> getActive(  @RequestParam("active") Boolean isActive,
                                                         @RequestParam(defaultValue="0") int page, 
                                                         @RequestParam(defaultValue="10") int size,
                                                         @RequestParam(defaultValue = "dateCreated") String sortBy,
                                                         @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
-        return ResponseEntity.ok(empresaService.findByIsActive(pageable));
+        return ResponseEntity.ok(empresaService.findByIsActive(isActive, pageable));
     }
 
     @GetMapping(params = "dateCreated")
-    public ResponseEntity<Page<EmpresaDTO>> getDateCreated( @RequestParam String dateString,
+    public ResponseEntity<Page<EmpresaDTO>> getDateCreated( @RequestParam("dateCreated") String dateString,
                                                             @RequestParam(defaultValue="0") int page, 
                                                             @RequestParam(defaultValue="10") int size,
                                                             @RequestParam(defaultValue = "dateCreated") String sortBy,
@@ -73,7 +73,7 @@ public class EmpresaController {
     }
 
     @GetMapping(params = "dataUpdated")
-    public ResponseEntity<Page<EmpresaDTO>> getDateUpdated( @RequestParam String dateString,                                                 
+    public ResponseEntity<Page<EmpresaDTO>> getDateUpdated( @RequestParam("dataUpdated") String dateString,                                                 
                                                             @RequestParam(defaultValue="0") int page, 
                                                             @RequestParam(defaultValue="10") int size,
                                                             @RequestParam(defaultValue = "dateCreated") String sortBy,
@@ -86,12 +86,12 @@ public class EmpresaController {
     }
 
     @GetMapping(params = "nome")
-    public ResponseEntity<EmpresaDTO> getNome(@RequestParam String nome){
+    public ResponseEntity<EmpresaDTO> getNome(@RequestParam("nome") String nome){
         return ResponseEntity.ok(empresaService.findByName(nome));
     }
 
     @GetMapping(params = "cnpj")
-    public ResponseEntity<EmpresaDTO> getCNPJ(@RequestParam String cnpj){
+    public ResponseEntity<EmpresaDTO> getCNPJ(@RequestParam("cnpj") String cnpj){
         return ResponseEntity.ok(empresaService.findByCNPJ(cnpj));
     }
 
@@ -104,7 +104,7 @@ public class EmpresaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpresaDTO> updateEmpresa(@Valid @RequestBody UpdateEmpresaRequest request, Long id){
+    public ResponseEntity<EmpresaDTO> updateEmpresa(@Valid @RequestBody UpdateEmpresaRequest request, @PathVariable Long id){
         Empresa empresa = empresaService.update(id, request);
         EmpresaDTO empresaDTO = new EmpresaDTO(empresa);
 

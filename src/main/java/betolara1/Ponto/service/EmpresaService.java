@@ -43,8 +43,8 @@ public class EmpresaService {
     }
 
     @Transactional(readOnly = true)
-    public Page<EmpresaDTO> findByIsActive(Pageable pageable){
-        Page<Empresa> empresa = empresaRepository.findByIsActive(pageable);
+    public Page<EmpresaDTO> findByIsActive(Boolean isActive, Pageable pageable){
+        Page<Empresa> empresa = empresaRepository.findByIsActive(isActive, pageable);
 
         return empresa.map(EmpresaDTO::new);
     }
@@ -98,7 +98,7 @@ public class EmpresaService {
     public EmpresaDTO findByName(String nome){
         Empresa empresa = empresaRepository.findByNomeEmpresaContainingIgnoreCase(nome);
 
-        if(nome.isEmpty()){
+        if(empresa == null){
             throw new NotFoundException("Nome " +nome+ "não encontrado.");
         }
 
@@ -109,7 +109,7 @@ public class EmpresaService {
     public EmpresaDTO findByCNPJ(String cnpj){
         Empresa empresa = empresaRepository.findByCnpjContaining(cnpj);
 
-        if(cnpj.isEmpty()){
+        if(empresa == null){
             throw new NotFoundException("CNPJ "+cnpj+" não encontrado.");
         }
 
@@ -136,7 +136,7 @@ public class EmpresaService {
 
     @Transactional
     public Empresa update(Long id, UpdateEmpresaRequest request){
-        Empresa empresa = new Empresa();
+        Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new NotFoundException("ID da empresa não encontrado."));
 
         if(request.getBairro() != null){
             empresa.setBairro(request.getBairro());
@@ -167,14 +167,15 @@ public class EmpresaService {
         }
 
         Empresa updated = empresaRepository.save(empresa);
-        log.info("Produto {} foi alterado. ",id);
+        log.info("Empresa {} foi alterado. ", request.getNomeEmpresa());
 
         return updated;
     }
 
     public void disable(Long id){
-        Empresa empresa = new Empresa();
+        Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new NotFoundException("Empresa não encontrada. "));
 
         empresa.setIsActive(false);
+        empresaRepository.save(empresa);
     }
 }

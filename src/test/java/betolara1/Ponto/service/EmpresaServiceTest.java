@@ -91,14 +91,14 @@ public class EmpresaServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Empresa> page = new PageImpl<>(Collections.singletonList(empresa));
         
-        when(empresaRepository.findByIsActive(pageable)).thenReturn(page);
+        when(empresaRepository.findByIsActive(true, pageable)).thenReturn(page);
 
-        Page<EmpresaDTO> result = empresaService.findByIsActive(pageable);
+        Page<EmpresaDTO> result = empresaService.findByIsActive(true, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertTrue(result.getContent().get(0).isActive());
-        verify(empresaRepository, times(1)).findByIsActive(pageable);
+        verify(empresaRepository, times(1)).findByIsActive(true, pageable);
     }
 
     @Test
@@ -168,7 +168,9 @@ public class EmpresaServiceTest {
 
     @Test
     void findByName_WhenNameIsEmpty_ShouldThrowNotFoundException() {
-        assertThrows(NotFoundException.class, () -> empresaService.findByName(""));
+        when(empresaRepository.findByNomeEmpresaContainingIgnoreCase("Inexistente")).thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> empresaService.findByName("Inexistente"));
     }
 
     @Test
@@ -184,7 +186,9 @@ public class EmpresaServiceTest {
 
     @Test
     void findByCNPJ_WhenCnpjIsEmpty_ShouldThrowNotFoundException() {
-        assertThrows(NotFoundException.class, () -> empresaService.findByCNPJ(""));
+        when(empresaRepository.findByCnpjContaining("000000")).thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> empresaService.findByCNPJ("000000"));
     }
 
     @Test
@@ -224,22 +228,35 @@ public class EmpresaServiceTest {
         request.setNomeEmpresa("Empresa Atualizada");
         request.setCnpj("11111111111111");
 
-        Empresa updatedEmpresa = new Empresa();
-        updatedEmpresa.setNomeEmpresa(request.getNomeEmpresa());
-        updatedEmpresa.setCnpj(request.getCnpj());
-
-        when(empresaRepository.save(any(Empresa.class))).thenReturn(updatedEmpresa);
+        when(empresaRepository.findById(1L)).thenReturn(Optional.of(empresa));
+        when(empresaRepository.save(any(Empresa.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Empresa result = empresaService.update(1L, request);
 
         assertNotNull(result);
         assertEquals("Empresa Atualizada", result.getNomeEmpresa());
         assertEquals("11111111111111", result.getCnpj());
+        verify(empresaRepository, times(1)).findById(1L);
         verify(empresaRepository, times(1)).save(any(Empresa.class));
     }
 
     @Test
-    void disable_ShouldDoNothingOrNotThrow() {
-        assertDoesNotThrow(() -> empresaService.disable(1L));
+    void disable_ShouldDisableEmpresa() {
+        when(empresaRepository.findById(1L)).thenReturn(Optional.of(empresa));
+        when(empresaRepository.save(any(Empresa.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        empresaService.disable(1L);
+
+        assertFalse(empresa.getIsActive());
+        verify(empresaRepository, times(1)).findById(1L);
+        verify(empresaRepository, times(1)).save(any(Empresa.class));
+    }
+
+    @Test
+    void disable_WhenNotFound_ShouldThrowNotFoundException() {
+        when(empresaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> empresaService.disable(99L));
+        verify(empresaRepository, never()).save(any(Empresa.class));
     }
 }
