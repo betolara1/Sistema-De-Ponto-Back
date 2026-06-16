@@ -52,7 +52,7 @@ public class FotosServiceTest {
         foto = new Fotos();
         foto.setId(1L);
         foto.setFoto(new byte[]{1, 2, 3});
-        foto.setColaboradoresId(colaborador);
+        foto.setColaboradorId(colaborador);
         foto.setDateCreated(LocalDateTime.now());
         foto.setDateUpdated(LocalDateTime.now());
     }
@@ -69,7 +69,7 @@ public class FotosServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertArrayEquals(new byte[]{1, 2, 3}, result.getContent().get(0).foto());
-        assertEquals(1L, result.getContent().get(0).colaboradoresId());
+        assertEquals(1L, result.getContent().get(0).colaboradorId());
         verify(fotosRepository, times(1)).findAll(pageable);
     }
 
@@ -103,22 +103,22 @@ public class FotosServiceTest {
 
     @Test
     void findByColaboradorId_WhenExists_ShouldReturnFotosDTO() {
-        when(fotosRepository.findByColaboradorId(1L)).thenReturn(Optional.of(foto));
+        when(fotosRepository.findByColaboradorId_Id(1L)).thenReturn(Optional.of(foto));
 
         FotosDTO result = fotosService.findByColaboradorId(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.id());
-        assertEquals(1L, result.colaboradoresId());
-        verify(fotosRepository, times(1)).findByColaboradorId(1L);
+        assertEquals(1L, result.colaboradorId());
+        verify(fotosRepository, times(1)).findByColaboradorId_Id(1L);
     }
 
     @Test
     void findByColaboradorId_WhenDoesNotExist_ShouldThrowNotFoundException() {
-        when(fotosRepository.findByColaboradorId(2L)).thenReturn(Optional.empty());
+        when(fotosRepository.findByColaboradorId_Id(2L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> fotosService.findByColaboradorId(2L));
-        verify(fotosRepository, times(1)).findByColaboradorId(2L);
+        verify(fotosRepository, times(1)).findByColaboradorId_Id(2L);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class FotosServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getId());
         assertArrayEquals(new byte[]{4, 5, 6}, result.getFoto());
-        assertEquals(colaborador, result.getColaboradoresId());
+        assertEquals(colaborador, result.getColaboradorId());
         verify(colaboradoresRepository, times(1)).findById(1L);
         verify(fotosRepository, times(1)).save(any(Fotos.class));
     }
@@ -163,19 +163,17 @@ public class FotosServiceTest {
         request.setColaboradorId(1L);
         request.setFoto(new byte[]{7, 8, 9});
 
+        when(fotosRepository.findById(1L)).thenReturn(Optional.of(foto));
         when(colaboradoresRepository.findById(1L)).thenReturn(Optional.of(colaborador));
-        when(fotosRepository.save(any(Fotos.class))).thenAnswer(invocation -> {
-            Fotos input = invocation.getArgument(0);
-            input.setId(1L);
-            return input;
-        });
+        when(fotosRepository.save(any(Fotos.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Fotos result = fotosService.update(request, 1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertArrayEquals(new byte[]{7, 8, 9}, result.getFoto());
-        assertEquals(colaborador, result.getColaboradoresId());
+        assertEquals(colaborador, result.getColaboradorId());
+        verify(fotosRepository, times(1)).findById(1L);
         verify(colaboradoresRepository, times(1)).findById(1L);
         verify(fotosRepository, times(1)).save(any(Fotos.class));
     }
@@ -186,9 +184,11 @@ public class FotosServiceTest {
         request.setColaboradorId(2L);
         request.setFoto(new byte[]{7, 8, 9});
 
+        when(fotosRepository.findById(1L)).thenReturn(Optional.of(foto));
         when(colaboradoresRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> fotosService.update(request, 1L));
+        verify(fotosRepository, times(1)).findById(1L);
         verify(colaboradoresRepository, times(1)).findById(2L);
         verify(fotosRepository, never()).save(any(Fotos.class));
     }
@@ -198,19 +198,17 @@ public class FotosServiceTest {
         UpdateFotosRequest request = new UpdateFotosRequest();
         request.setFoto(new byte[]{7, 8, 9});
 
-        when(fotosRepository.save(any(Fotos.class))).thenAnswer(invocation -> {
-            Fotos input = invocation.getArgument(0);
-            input.setId(1L);
-            return input;
-        });
+        when(fotosRepository.findById(1L)).thenReturn(Optional.of(foto));
+        when(fotosRepository.save(any(Fotos.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Fotos result = fotosService.update(request, 1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertArrayEquals(new byte[]{7, 8, 9}, result.getFoto());
-        assertNull(result.getColaboradoresId());
+        assertEquals(colaborador, result.getColaboradorId());
         verify(colaboradoresRepository, never()).findById(anyLong());
+        verify(fotosRepository, times(1)).findById(1L);
         verify(fotosRepository, times(1)).save(any(Fotos.class));
     }
 }

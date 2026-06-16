@@ -9,5 +9,5 @@ import betolara1.Ponto.model.Fotos;
 
 @Repository
 public interface FotosRepository extends JpaRepository<Fotos, Long> {
-    Optional<Fotos> findByColaboradorId(Long id);
+    Optional<Fotos> findByColaboradorId_Id(Long id);
 }

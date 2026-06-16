@@ -46,7 +46,7 @@ public class FotosService {
 
     @Transactional(readOnly = true)
     public FotosDTO findByColaboradorId(Long id){
-        Fotos foto = fotosRepository.findByColaboradorId(id).orElseThrow(() -> new NotFoundException("Colaborador com ID "+id+" não encontrado."));
+        Fotos foto = fotosRepository.findByColaboradorId_Id(id).orElseThrow(() -> new NotFoundException("Colaborador com ID "+id+" não encontrado."));
 
         return new FotosDTO(foto);
     }
@@ -57,7 +57,7 @@ public class FotosService {
 
         Colaboradores colab = colaboradoresRepository.findById(request.getColaboradorId()).orElseThrow(() -> new NotFoundException("Colaborador com ID " +request.getColaboradorId()+ " não encontrado."));
     
-        foto.setColaboradoresId(colab);
+        foto.setColaboradorId(colab);
         foto.setFoto(request.getFoto());
 
         Fotos saved = fotosRepository.save(foto);
@@ -68,7 +68,7 @@ public class FotosService {
 
     @Transactional
     public Fotos update(UpdateFotosRequest request, Long id){
-        Fotos foto = new Fotos();
+        Fotos foto = fotosRepository.findById(id).orElseThrow(() -> new NotFoundException("ID não encontrado."));
 
         if(request.getFoto() != null){
             foto.setFoto(request.getFoto());
@@ -76,7 +76,7 @@ public class FotosService {
 
         if(request.getColaboradorId() != null){
             Colaboradores colab = colaboradoresRepository.findById(request.getColaboradorId()).orElseThrow(() -> new NotFoundException("ID do colaborador "+request.getColaboradorId()+" não encontrado."));
-            foto.setColaboradoresId(colab);
+            foto.setColaboradorId(colab);
         }
 
         Fotos update = fotosRepository.save(foto);

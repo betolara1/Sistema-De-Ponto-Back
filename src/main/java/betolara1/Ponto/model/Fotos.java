@@ -29,7 +29,7 @@ public class Fotos {
 
     @OneToOne
     @JoinColumn(name = "id_colaborador")
-    private Colaboradores colaboradoresId;
+    private Colaboradores colaboradorId;
 
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;

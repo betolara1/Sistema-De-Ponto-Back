@@ -49,8 +49,8 @@ public class FotosController {
     }
 
     @GetMapping(params = "colaboradorId")
-    public ResponseEntity<FotosDTO> getColaboradorId(@RequestParam Long id){
-        return ResponseEntity.ok(fotosService.findByColaboradorId(id));
+    public ResponseEntity<FotosDTO> getColaboradorId(@RequestParam("colaboradorId") Long colaboradorId){
+        return ResponseEntity.ok(fotosService.findByColaboradorId(colaboradorId));
     }
 
     @PostMapping
@@ -62,11 +62,10 @@ public class FotosController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FotosDTO> getUpdateFotos(@Valid @RequestBody UpdateFotosRequest request, Long id){
+    public ResponseEntity<FotosDTO> getUpdateFotos(@Valid @RequestBody UpdateFotosRequest request, @PathVariable Long id){
         Fotos foto = fotosService.update(request, id);
         FotosDTO fotoDTO = new FotosDTO(foto);
 
         return ResponseEntity.status(HttpStatus.OK).body(fotoDTO);
     }
-
 }

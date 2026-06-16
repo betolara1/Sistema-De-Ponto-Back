@@ -69,7 +69,7 @@ public class FotosControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].colaboradoresId").value(1L));
+                .andExpect(jsonPath("$.content[0].colaboradorId").value(1L));
     }
 
     @Test
@@ -80,22 +80,19 @@ public class FotosControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.colaboradoresId").value(1L));
+                .andExpect(jsonPath("$.colaboradorId").value(1L));
     }
 
     @Test
     void getColaboradorId_ShouldReturnFotosDTO() throws Exception {
         when(fotosService.findByColaboradorId(1L)).thenReturn(fotosDTO);
 
-        // Under FotosController.java, getColaboradorId matches parameters condition params="colaboradorId"
-        // but reads from @RequestParam Long id. Thus we provide both parameter values.
         mockMvc.perform(get("/fotos")
-                .param("colaboradorId", "")
-                .param("id", "1")
+                .param("colaboradorId", "1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.colaboradoresId").value(1L));
+                .andExpect(jsonPath("$.colaboradorId").value(1L));
     }
 
     @Test
@@ -110,7 +107,7 @@ public class FotosControllerTest {
         Fotos savedFoto = new Fotos();
         savedFoto.setId(1L);
         savedFoto.setFoto(new byte[]{1, 2, 3});
-        savedFoto.setColaboradoresId(colab);
+        savedFoto.setColaboradorId(colab);
 
         when(fotosService.save(any(SaveFotosRequest.class))).thenReturn(savedFoto);
 
@@ -119,7 +116,7 @@ public class FotosControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.colaboradoresId").value(1L));
+                .andExpect(jsonPath("$.colaboradorId").value(1L));
     }
 
     @Test
@@ -134,18 +131,15 @@ public class FotosControllerTest {
         Fotos updatedFoto = new Fotos();
         updatedFoto.setId(1L);
         updatedFoto.setFoto(new byte[]{4, 5, 6});
-        updatedFoto.setColaboradoresId(colab);
+        updatedFoto.setColaboradorId(colab);
 
         when(fotosService.update(any(UpdateFotosRequest.class), eq(1L))).thenReturn(updatedFoto);
 
-        // The controller method expects Long id without @PathVariable annotation.
-        // Therefore, we must supply 'id=1' as a query parameter in addition to the path /{id}.
         mockMvc.perform(put("/fotos/{id}", 1L)
-                .param("id", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.colaboradoresId").value(1L));
+                .andExpect(jsonPath("$.colaboradorId").value(1L));
     }
 }
