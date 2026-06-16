@@ -106,18 +106,18 @@ public class ColaboradoresServiceTest {
 
     @Test
     void findByNome_WhenFound_ShouldReturnColaboradoresDTO() {
-        when(colaboradoresRepository.findByNomeContainingIgnoreCase("Teste")).thenReturn(Optional.of(colab));
+        when(colaboradoresRepository.findByNomeColaboradorContainingIgnoreCase("Teste")).thenReturn(Optional.of(colab));
 
         ColaboradoresDTO result = colaboradoresService.findByNome("Teste");
 
         assertNotNull(result);
         assertEquals("Colaborador Teste", result.nomeColaborador());
-        verify(colaboradoresRepository, times(1)).findByNomeContainingIgnoreCase("Teste");
+        verify(colaboradoresRepository, times(1)).findByNomeColaboradorContainingIgnoreCase("Teste");
     }
 
     @Test
     void findByNome_WhenNotFound_ShouldThrowNotFoundException() {
-        when(colaboradoresRepository.findByNomeContainingIgnoreCase("NaoExiste")).thenReturn(Optional.empty());
+        when(colaboradoresRepository.findByNomeColaboradorContainingIgnoreCase("NaoExiste")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> colaboradoresService.findByNome("NaoExiste"));
     }
@@ -141,7 +141,7 @@ public class ColaboradoresServiceTest {
 
     @Test
     void findByEmpresaId_WhenFound_ShouldReturnColaboradoresDTO() {
-        when(colaboradoresRepository.findByEmpresaId(1L)).thenReturn(Optional.of(colab));
+        when(colaboradoresRepository.findByEmpresaId_Id(1L)).thenReturn(Optional.of(colab));
 
         ColaboradoresDTO result = colaboradoresService.findByEmpresaId(1L);
 
@@ -151,7 +151,7 @@ public class ColaboradoresServiceTest {
 
     @Test
     void findByEmpresaId_WhenNotFound_ShouldThrowNotFoundException() {
-        when(colaboradoresRepository.findByEmpresaId(2L)).thenReturn(Optional.empty());
+        when(colaboradoresRepository.findByEmpresaId_Id(2L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> colaboradoresService.findByEmpresaId(2L));
     }
@@ -255,7 +255,22 @@ public class ColaboradoresServiceTest {
     }
 
     @Test
-    void delete_ShouldDoNothingOrNotThrow() {
-        assertDoesNotThrow(() -> colaboradoresService.delete(1L));
+    void delete_ShouldDisableColaborador() {
+        when(colaboradoresRepository.findById(1L)).thenReturn(Optional.of(colab));
+        when(colaboradoresRepository.save(any(Colaboradores.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        colaboradoresService.delete(1L);
+
+        assertFalse(colab.getIsActive());
+        verify(colaboradoresRepository, times(1)).findById(1L);
+        verify(colaboradoresRepository, times(1)).save(any(Colaboradores.class));
+    }
+
+    @Test
+    void delete_WhenNotFound_ShouldThrowNotFoundException() {
+        when(colaboradoresRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> colaboradoresService.delete(99L));
+        verify(colaboradoresRepository, never()).save(any(Colaboradores.class));
     }
 }

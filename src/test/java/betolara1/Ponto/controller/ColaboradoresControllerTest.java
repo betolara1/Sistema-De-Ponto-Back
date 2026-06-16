@@ -128,7 +128,6 @@ public class ColaboradoresControllerTest {
 
         mockMvc.perform(get("/colaboradores")
                 .param("active", "true")
-                .param("isActive", "true")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeColaborador").value("Colaborador Teste"));
@@ -140,8 +139,7 @@ public class ColaboradoresControllerTest {
         when(colaboradoresService.getByDateCreated(eq("2026-06-12"), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/colaboradores")
-                .param("dateCreated", "")
-                .param("dateString", "2026-06-12")
+                .param("dateCreated", "2026-06-12")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeColaborador").value("Colaborador Teste"));
@@ -153,8 +151,7 @@ public class ColaboradoresControllerTest {
         when(colaboradoresService.getByDateUpdated(eq("2026-06-12"), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/colaboradores")
-                .param("dataUpdated", "")
-                .param("dateString", "2026-06-12")
+                .param("dataUpdated", "2026-06-12")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].nomeColaborador").value("Colaborador Teste"));
@@ -207,8 +204,7 @@ public class ColaboradoresControllerTest {
 
         when(colaboradoresService.update(eq(1L), any(UpdateColaboradoresRequest.class))).thenReturn(updatedColab);
 
-        mockMvc.perform(put("/colaboradores")
-                .param("id", "1")
+        mockMvc.perform(put("/colaboradores/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

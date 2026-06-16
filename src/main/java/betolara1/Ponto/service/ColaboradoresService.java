@@ -54,7 +54,7 @@ public class ColaboradoresService {
 
     @Transactional(readOnly = true)
     public ColaboradoresDTO findByNome(String nome){
-        Colaboradores colab = colaboradoresRepository.findByNomeContainingIgnoreCase(nome).orElseThrow(() -> new NotFoundException("Não existe nenhum nome "+nome));
+        Colaboradores colab = colaboradoresRepository.findByNomeColaboradorContainingIgnoreCase(nome).orElseThrow(() -> new NotFoundException("Não existe nenhum nome "+nome));
 
         return new ColaboradoresDTO(colab);
     }
@@ -68,7 +68,7 @@ public class ColaboradoresService {
 
     @Transactional(readOnly = true)
     public ColaboradoresDTO findByEmpresaId(Long empresaId){
-        Colaboradores colab = colaboradoresRepository.findByEmpresaId(empresaId).orElseThrow(() -> new NotFoundException("Empresa com id "+empresaId+" não encontrado."));
+        Colaboradores colab = colaboradoresRepository.findByEmpresaId_Id(empresaId).orElseThrow(() -> new NotFoundException("Empresa com id "+empresaId+" não encontrado."));
 
         return new ColaboradoresDTO(colab);
     }
@@ -178,8 +178,9 @@ public class ColaboradoresService {
 
     @Transactional
     public void delete(Long id){
-        Colaboradores colab = new Colaboradores();
+        Colaboradores colab = colaboradoresRepository.findById(id).orElseThrow(() -> new NotFoundException("Colaborador não encontrado."));
 
         colab.setIsActive(false);
+        colaboradoresRepository.save(colab);
     }
 }

@@ -18,11 +18,11 @@ public interface ColaboradoresRepository extends JpaRepository<Colaboradores, Lo
     // Busca tudo que foi atualizado entre o início do dia (00:00:00) e o fim (23:59:59)
     Page<Colaboradores> findByDateUpdatedBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    Optional<Colaboradores> findByNomeContainingIgnoreCase(String nome);
+    Optional<Colaboradores> findByNomeColaboradorContainingIgnoreCase(String nome);
 
     Optional<Colaboradores> findByCpfContainingIgnoreCase(String cpf);
 
-    Optional<Colaboradores> findByEmpresaId(Long empresaId);
+    Optional<Colaboradores> findByEmpresaId_Id(Long empresaId);
 
     Page<Colaboradores> findByIsActive(Boolean isActive, Pageable pageable);
 }

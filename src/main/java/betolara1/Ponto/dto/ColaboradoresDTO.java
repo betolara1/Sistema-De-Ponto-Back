@@ -19,7 +19,7 @@ public record ColaboradoresDTO(
             col.getId(),
             col.getNomeColaborador(),
             col.getCpf(),
-            col.getEmpresaId().getId(),
+            col.getEmpresaId() != null ? col.getEmpresaId().getId() : null,
             col.getIsActive(),
             col.getDateCreated(),
             col.getDateUpdated()

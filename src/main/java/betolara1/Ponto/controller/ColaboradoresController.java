@@ -49,22 +49,22 @@ public class ColaboradoresController {
     }
 
     @GetMapping(params = "nome")
-    public ResponseEntity<ColaboradoresDTO> getByNome(@RequestParam String nome){
+    public ResponseEntity<ColaboradoresDTO> getByNome(@RequestParam("nome") String nome){
         return ResponseEntity.ok(colaboradoresService.findByNome(nome));
     }
 
     @GetMapping(params = "cpf")
-    public ResponseEntity<ColaboradoresDTO> getByCpf(@RequestParam String cpf){
+    public ResponseEntity<ColaboradoresDTO> getByCpf(@RequestParam("cpf") String cpf){
         return ResponseEntity.ok(colaboradoresService.findByCpf(cpf));
     }
 
     @GetMapping(params = "empresaId")
-    public ResponseEntity<ColaboradoresDTO> getByEmpresaId(@RequestParam Long empresaId){
+    public ResponseEntity<ColaboradoresDTO> getByEmpresaId(@RequestParam("empresaId") Long empresaId){
         return ResponseEntity.ok(colaboradoresService.findByEmpresaId(empresaId));
     }
 
     @GetMapping(params = "active")
-    public ResponseEntity<Page<ColaboradoresDTO>> getActive(@RequestParam Boolean isActive,
+    public ResponseEntity<Page<ColaboradoresDTO>> getActive(@RequestParam("active") Boolean isActive,
                                                             @RequestParam(defaultValue="0") int page, 
                                                             @RequestParam(defaultValue="10") int size,
                                                             @RequestParam(defaultValue = "dateCreated") String sortBy,
@@ -75,27 +75,23 @@ public class ColaboradoresController {
     }
 
     @GetMapping(params = "dateCreated")
-    public ResponseEntity<Page<ColaboradoresDTO>> getDateCreated(@RequestParam String dateString,
+    public ResponseEntity<Page<ColaboradoresDTO>> getDateCreated(@RequestParam("dateCreated") String dateString,
                                                                 @RequestParam(defaultValue="0") int page, 
                                                                 @RequestParam(defaultValue="10") int size,
                                                                 @RequestParam(defaultValue = "dateCreated") String sortBy,
                                                                 @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
-        
-        // Chamada estática: Classe.metodo()
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
         return ResponseEntity.ok(colaboradoresService.getByDateCreated(dateString, pageable));
     }
 
     @GetMapping(params = "dataUpdated")
-    public ResponseEntity<Page<ColaboradoresDTO>> getDateUpdated(@RequestParam String dateString,                                                 
+    public ResponseEntity<Page<ColaboradoresDTO>> getDateUpdated(@RequestParam("dataUpdated") String dateString,                                                 
                                                                 @RequestParam(defaultValue="0") int page, 
                                                                 @RequestParam(defaultValue="10") int size,
                                                                 @RequestParam(defaultValue = "dateCreated") String sortBy,
                                                                 @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
-        
-        // Chamada estática: Classe.metodo()
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
         return ResponseEntity.ok(colaboradoresService.getByDateUpdated(dateString, pageable));
     }
@@ -108,8 +104,8 @@ public class ColaboradoresController {
         return ResponseEntity.status(HttpStatus.OK).body(colabDTO);
     }
 
-    @PutMapping
-    public ResponseEntity<ColaboradoresDTO> updateColaboradores(@Valid @RequestBody UpdateColaboradoresRequest request, long id){
+    @PutMapping("/{id}")
+    public ResponseEntity<ColaboradoresDTO> updateColaboradores(@Valid @RequestBody UpdateColaboradoresRequest request, @PathVariable long id){
         Colaboradores colab = colaboradoresService.update(id, request);
         ColaboradoresDTO colabDTO = new ColaboradoresDTO(colab);
 
