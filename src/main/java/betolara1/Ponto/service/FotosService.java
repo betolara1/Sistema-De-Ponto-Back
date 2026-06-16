@@ -1,5 +1,7 @@
 package betolara1.Ponto.service;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class FotosService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "Fotos", key = "#id")
     public FotosDTO findById(Long id){
         Fotos fotos = fotosRepository.findById(id).orElseThrow(() -> new NotFoundException("Id "+id+" não encontrado."));
 
@@ -45,8 +48,9 @@ public class FotosService {
     }
 
     @Transactional(readOnly = true)
-    public FotosDTO findByColaboradorId(Long id){
-        Fotos foto = fotosRepository.findByColaboradorId_Id(id).orElseThrow(() -> new NotFoundException("Colaborador com ID "+id+" não encontrado."));
+    @Cacheable(value = "Fotos", key = "#colabId")
+    public FotosDTO findByColaboradorId(Long colabId){
+        Fotos foto = fotosRepository.findByColaboradorId_Id(colabId).orElseThrow(() -> new NotFoundException("Colaborador com ID "+colabId+" não encontrado."));
 
         return new FotosDTO(foto);
     }
@@ -67,6 +71,7 @@ public class FotosService {
     }
 
     @Transactional
+    @CacheEvict(value = "Fotos", allEntries = true) 
     public Fotos update(UpdateFotosRequest request, Long id){
         Fotos foto = fotosRepository.findById(id).orElseThrow(() -> new NotFoundException("ID não encontrado."));
 

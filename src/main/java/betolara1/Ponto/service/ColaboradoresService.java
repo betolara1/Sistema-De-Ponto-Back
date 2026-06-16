@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 
 import betolara1.Ponto.dto.ColaboradoresDTO;
@@ -45,7 +47,9 @@ public class ColaboradoresService {
         return colab.map(ColaboradoresDTO::new);
     }
 
+    // BUSCA POR ID: Salvamos no cache "colaboradores" usando o ID como chave
     @Transactional(readOnly = true)
+    @Cacheable(value = "colaboradores", key = "#id")
     public ColaboradoresDTO findById(@NonNull Long id){
         Colaboradores colab = colaboradoresRepository.findById(id).orElseThrow(() -> new NotFoundException("Id " +id+ " não encontrado."));
 
@@ -53,6 +57,7 @@ public class ColaboradoresService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "colaboradores", key = "#nome")
     public ColaboradoresDTO findByNome(String nome){
         Colaboradores colab = colaboradoresRepository.findByNomeColaboradorContainingIgnoreCase(nome).orElseThrow(() -> new NotFoundException("Não existe nenhum nome "+nome));
 
@@ -60,6 +65,7 @@ public class ColaboradoresService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "colaboradores", key = "#cpf")
     public ColaboradoresDTO findByCpf(String cpf){
         Colaboradores colab = colaboradoresRepository.findByCpfContainingIgnoreCase(cpf).orElseThrow(() -> new NotFoundException("CPF "+cpf+" Invalido/não encontrado."));
 
@@ -67,6 +73,7 @@ public class ColaboradoresService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "colaboradores", key = "#empresaId")
     public ColaboradoresDTO findByEmpresaId(Long empresaId){
         Colaboradores colab = colaboradoresRepository.findByEmpresaId_Id(empresaId).orElseThrow(() -> new NotFoundException("Empresa com id "+empresaId+" não encontrado."));
 
@@ -145,7 +152,11 @@ public class ColaboradoresService {
         return save;
     }
 
+
+    //ATUALIZAR REGISTRO: Usamos @CacheEvict para apagar o cache antigo desse ID.
+    // Na próxima vez que o findById for chamado, ele pegará o valor atualizado do banco.
     @Transactional
+    @CacheEvict(value = "colaboradores", allEntries = true) 
     public Colaboradores update(Long id, UpdateColaboradoresRequest request){
         Colaboradores colab = colaboradoresRepository.findById(id).orElseThrow(() -> new NotFoundException("Colaborador com ID "+id+" Não foi encontrado."));
     
@@ -176,7 +187,10 @@ public class ColaboradoresService {
         return update;
     }
 
+
+    // DELETAR/DESATIVAR REGISTRO: Limpa o cache para que ninguém consulte um colaborador inativo desatualizado.
     @Transactional
+    @CacheEvict(value = "colaboradores", allEntries = true) 
     public void delete(Long id){
         Colaboradores colab = colaboradoresRepository.findById(id).orElseThrow(() -> new NotFoundException("Colaborador não encontrado."));
 

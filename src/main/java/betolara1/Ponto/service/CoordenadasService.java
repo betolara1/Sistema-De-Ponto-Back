@@ -1,5 +1,7 @@
 package betolara1.Ponto.service;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class CoordenadasService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "coordenadas", key = "#empresaId")
     public CoordenadasDTO findByEmpresaId(Long empresaId){
         Coordenadas coord = coordenadasRepository.findByEmpresaIdId(empresaId)
             .orElseThrow(() -> new NotFoundException("Coordenadas não encontradas para a empresa com ID: " + empresaId));
@@ -62,6 +65,7 @@ public class CoordenadasService {
     }
 
     @Transactional
+    @CacheEvict(value = "coordenadas", allEntries = true) 
     public Coordenadas update(UpdateCoordenadasRequest request, Long id){
         Coordenadas coord = coordenadasRepository.findById(id).orElseThrow(() -> new NotFoundException("Coordenadas com ID " + id + " não encontradas"));
 

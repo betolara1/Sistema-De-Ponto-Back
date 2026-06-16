@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class PontoService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "Ponto", key = "#id")
     public PontoDTO findById(Long id){
         Ponto ponto = pontoRepository.findById(id).orElseThrow(() -> new NotFoundException("ID não encontrado. "));
     
@@ -46,15 +49,17 @@ public class PontoService {
     }
 
     @Transactional(readOnly = true)
-    public PontoDTO findByColaboradorId(Long id){
-        Ponto ponto = pontoRepository.findByColaboradorId_Id(id).orElseThrow(() -> new NotFoundException("ID do colaborador não encontrado. "));
+    @Cacheable(value = "Ponto", key = "#colabId")
+    public PontoDTO findByColaboradorId(Long colabId){
+        Ponto ponto = pontoRepository.findByColaboradorId_Id(colabId).orElseThrow(() -> new NotFoundException("ID do colaborador não encontrado. "));
     
         return new PontoDTO(ponto);
     }
 
     @Transactional(readOnly = true)
-    public PontoDTO findByColaboradorIdUpdater(Long id){
-        Ponto ponto = pontoRepository.findByColaboradorIdUpdate_Id(id).orElseThrow(() -> new NotFoundException("ID do responsável não localizado. "));
+    @Cacheable(value = "Ponto", key = "#responsalvel")
+    public PontoDTO findByColaboradorIdUpdater(Long responsalvel){
+        Ponto ponto = pontoRepository.findByColaboradorIdUpdate_Id(responsalvel).orElseThrow(() -> new NotFoundException("ID do responsável não localizado. "));
         
         return new PontoDTO(ponto);
     }
@@ -96,6 +101,7 @@ public class PontoService {
     }
 
     @Transactional
+    @CacheEvict(value = "Ponto", allEntries = true) 
     public Ponto update(UpdatePontoRequest request, Long idPonto){
         Ponto ponto = pontoRepository.findById(idPonto).orElseThrow(() -> new NotFoundException("Ponto não encontrado."));
 

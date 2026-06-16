@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
@@ -36,6 +38,7 @@ public class EmpresaService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "Empresa", key = "#id")
     public EmpresaDTO findById(@NonNull Long id){
         Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new NotFoundException("Id " +id+ " não encontrado"));
 
@@ -95,6 +98,7 @@ public class EmpresaService {
 
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "Empresa", key = "#nome")
     public EmpresaDTO findByName(String nome){
         Empresa empresa = empresaRepository.findByNomeEmpresaContainingIgnoreCase(nome);
 
@@ -106,6 +110,7 @@ public class EmpresaService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "Empresa", key = "#cnpj")
     public EmpresaDTO findByCNPJ(String cnpj){
         Empresa empresa = empresaRepository.findByCnpjContaining(cnpj);
 
@@ -135,6 +140,7 @@ public class EmpresaService {
     }
 
     @Transactional
+    @CacheEvict(value = "Empresa", allEntries = true) 
     public Empresa update(Long id, UpdateEmpresaRequest request){
         Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new NotFoundException("ID da empresa não encontrado."));
 
@@ -172,6 +178,8 @@ public class EmpresaService {
         return updated;
     }
 
+    @Transactional
+    @CacheEvict(value = "Empresa", allEntries = true) 
     public void disable(Long id){
         Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new NotFoundException("Empresa não encontrada. "));
 
