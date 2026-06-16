@@ -12,7 +12,6 @@ import betolara1.Ponto.model.Coordenadas;
 import betolara1.Ponto.model.Empresa;
 import betolara1.Ponto.repository.CoordenadasRepository;
 import betolara1.Ponto.repository.EmpresaRepository;
-import io.github.resilience4j.core.lang.NonNull;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +27,7 @@ public class CoordenadasService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CoordenadasDTO> findAll(@NonNull Pageable pageable){
+    public Page<CoordenadasDTO> findAll(Pageable pageable){
         Page<Coordenadas> coord = coordenadasRepository.findAll(pageable);
 
         if(coord.isEmpty()){

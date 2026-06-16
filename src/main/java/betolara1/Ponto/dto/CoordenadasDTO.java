@@ -20,7 +20,7 @@ public record CoordenadasDTO(
             cood.getId(),
             cood.getLatitude(),
             cood.getLongitude(),
-            cood.getEmpresaId().getId(),
+            cood.getEmpresaId() != null ? cood.getEmpresaId().getId() : null,
             cood.getDateCreated(),
             cood.getDateUpdated()
         );
