@@ -34,9 +34,9 @@ public class FotosController {
 
     @GetMapping
     public ResponseEntity<Page<FotosDTO>> getAll(@RequestParam(defaultValue="0") int page, 
-                                 @RequestParam(defaultValue="10") int size,
-                                 @RequestParam(defaultValue = "dateCreated") String sortBy,
-                                 @RequestParam(defaultValue = "desc") @NonNull String direction
+                                                @RequestParam(defaultValue="10") int size,
+                                                @RequestParam(defaultValue = "dateCreated") String sortBy,
+                                                @RequestParam(defaultValue = "desc") @NonNull String direction
     ){
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
 
