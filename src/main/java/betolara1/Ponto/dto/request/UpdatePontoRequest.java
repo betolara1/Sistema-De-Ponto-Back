@@ -10,5 +10,5 @@ public class UpdatePontoRequest {
     @NotNull(message =  "ID do Colaborador que alterou ponto é obrigatório.")
     private Long colaboradorIdUpdate;
 
-    private LocalDateTime pontoUpdated;
+    private LocalDateTime ponto;
 }

@@ -58,8 +58,7 @@ public class PontoServiceTest {
         ponto.setId(10L);
         ponto.setColaboradorId(colab);
         ponto.setColaboradorIdUpdate(colabUpdate);
-        ponto.setPontoCreate(LocalDateTime.now());
-        ponto.setPontoUpdated(LocalDateTime.now());
+        ponto.setPonto(LocalDateTime.now());
     }
 
     @Test
@@ -74,12 +73,12 @@ public class PontoServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         // In PontoDTO, the fields map as:
-        // first field = ponto.getColaboradorId().getId() -> 1L
-        // second field = ponto.getColaboradorIdUpdate().getId() -> 2L
-        // third field = ponto.getId() -> 10L
-        assertEquals(1L, result.getContent().get(0).id());
-        assertEquals(2L, result.getContent().get(0).colaboradorId());
-        assertEquals(10L, result.getContent().get(0).colaboradorIdUpdate());
+        // first field = ponto.getId() -> 10L
+        // second field = ponto.getColaboradorId().getId() -> 1L
+        // third field = ponto.getColaboradorIdUpdate().getId() -> 2L
+        assertEquals(10L, result.getContent().get(0).id());
+        assertEquals(1L, result.getContent().get(0).colaboradorId());
+        assertEquals(2L, result.getContent().get(0).colaboradorIdUpdate());
         verify(pontoRepository, times(1)).findAll(pageable);
     }
 
@@ -90,9 +89,9 @@ public class PontoServiceTest {
         PontoDTO result = pontoService.findById(10L);
 
         assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals(2L, result.colaboradorId());
-        assertEquals(10L, result.colaboradorIdUpdate());
+        assertEquals(10L, result.id());
+        assertEquals(1L, result.colaboradorId());
+        assertEquals(2L, result.colaboradorIdUpdate());
         verify(pontoRepository, times(1)).findById(10L);
     }
 
@@ -106,36 +105,38 @@ public class PontoServiceTest {
 
     @Test
     void findByColaboradorId_WhenFound_ShouldReturnPontoDTO() {
-        when(pontoRepository.findByColaboradorId(1L)).thenReturn(Optional.of(ponto));
+        when(pontoRepository.findByColaboradorId_Id(1L)).thenReturn(Optional.of(ponto));
 
         PontoDTO result = pontoService.findByColaboradorId(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.id());
-        verify(pontoRepository, times(1)).findByColaboradorId(1L);
+        assertEquals(10L, result.id());
+        assertEquals(1L, result.colaboradorId());
+        verify(pontoRepository, times(1)).findByColaboradorId_Id(1L);
     }
 
     @Test
     void findByColaboradorId_WhenNotFound_ShouldThrowNotFoundException() {
-        when(pontoRepository.findByColaboradorId(99L)).thenReturn(Optional.empty());
+        when(pontoRepository.findByColaboradorId_Id(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> pontoService.findByColaboradorId(99L));
     }
 
     @Test
     void findByColaboradorIdUpdater_WhenFound_ShouldReturnPontoDTO() {
-        when(pontoRepository.findByColaboradorUpdate(2L)).thenReturn(Optional.of(ponto));
+        when(pontoRepository.findByColaboradorIdUpdate_Id(2L)).thenReturn(Optional.of(ponto));
 
         PontoDTO result = pontoService.findByColaboradorIdUpdater(2L);
 
         assertNotNull(result);
-        assertEquals(2L, result.colaboradorId());
-        verify(pontoRepository, times(1)).findByColaboradorUpdate(2L);
+        assertEquals(10L, result.id());
+        assertEquals(2L, result.colaboradorIdUpdate());
+        verify(pontoRepository, times(1)).findByColaboradorIdUpdate_Id(2L);
     }
 
     @Test
     void findByColaboradorIdUpdater_WhenNotFound_ShouldThrowNotFoundException() {
-        when(pontoRepository.findByColaboradorUpdate(99L)).thenReturn(Optional.empty());
+        when(pontoRepository.findByColaboradorIdUpdate_Id(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> pontoService.findByColaboradorIdUpdater(99L));
     }
@@ -145,43 +146,21 @@ public class PontoServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Ponto> page = new PageImpl<>(Collections.singletonList(ponto));
 
-        when(pontoRepository.findByDateCreatedBetween(any(), any(), eq(pageable))).thenReturn(page);
+        when(pontoRepository.findByPontoBetween(any(), any(), eq(pageable))).thenReturn(page);
 
         Page<PontoDTO> result = pontoService.getByPontoCreated("2026-06-16", pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(pontoRepository, times(1)).findByDateCreatedBetween(any(), any(), eq(pageable));
+        verify(pontoRepository, times(1)).findByPontoBetween(any(), any(), eq(pageable));
     }
 
     @Test
     void getByPontoCreated_WhenEmpty_ShouldThrowNotFoundException() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(pontoRepository.findByDateCreatedBetween(any(), any(), eq(pageable))).thenReturn(Page.empty());
+        when(pontoRepository.findByPontoBetween(any(), any(), eq(pageable))).thenReturn(Page.empty());
 
         assertThrows(NotFoundException.class, () -> pontoService.getByPontoCreated("2026-06-16", pageable));
-    }
-
-    @Test
-    void getByPontoUpdated_WhenFound_ShouldReturnPageOfPontoDTO() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Ponto> page = new PageImpl<>(Collections.singletonList(ponto));
-
-        when(pontoRepository.findByDateUpdatedBetween(any(), any(), eq(pageable))).thenReturn(page);
-
-        Page<PontoDTO> result = pontoService.getByPontoUpdated("2026-06-16", pageable);
-
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        verify(pontoRepository, times(1)).findByDateUpdatedBetween(any(), any(), eq(pageable));
-    }
-
-    @Test
-    void getByPontoUpdated_WhenEmpty_ShouldThrowNotFoundException() {
-        Pageable pageable = PageRequest.of(0, 10);
-        when(pontoRepository.findByDateUpdatedBetween(any(), any(), eq(pageable))).thenReturn(Page.empty());
-
-        assertThrows(NotFoundException.class, () -> pontoService.getByPontoUpdated("2026-06-16", pageable));
     }
 
     @Test
@@ -221,33 +200,41 @@ public class PontoServiceTest {
         UpdatePontoRequest request = new UpdatePontoRequest();
         request.setColaboradorIdUpdate(2L);
         LocalDateTime updateTime = LocalDateTime.now().plusHours(1);
-        request.setPontoUpdated(updateTime);
+        request.setPonto(updateTime);
 
-        // Under the hood, PontoService.update finds the collaborator by the ID parameter passed to the method (not request.colaboradorIdUpdate!)
-        when(colaboradoresRepository.findById(1L)).thenReturn(Optional.of(colab));
-        when(pontoRepository.save(any(Ponto.class))).thenAnswer(invocation -> {
-            Ponto saved = invocation.getArgument(0);
-            saved.setId(10L);
-            return saved;
-        });
+        when(pontoRepository.findById(10L)).thenReturn(Optional.of(ponto));
+        when(colaboradoresRepository.findById(2L)).thenReturn(Optional.of(colabUpdate));
+        when(pontoRepository.save(any(Ponto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Ponto result = pontoService.update(request, 1L);
+        Ponto result = pontoService.update(request, 10L);
 
         assertNotNull(result);
         assertEquals(10L, result.getId());
-        // Since request.getColaboradorIdUpdate() is not null, setColaboradorIdUpdate is called with the found collaborator (colab)
-        assertEquals(colab, result.getColaboradorIdUpdate());
-        assertEquals(updateTime, result.getPontoUpdated());
-        verify(colaboradoresRepository, times(1)).findById(1L);
+        assertEquals(colabUpdate, result.getColaboradorIdUpdate());
+        assertEquals(updateTime, result.getPonto());
+        verify(pontoRepository, times(1)).findById(10L);
+        verify(colaboradoresRepository, times(1)).findById(2L);
         verify(pontoRepository, times(1)).save(any(Ponto.class));
     }
 
     @Test
-    void update_WhenColaboradorNotFound_ShouldThrowNotFoundException() {
+    void update_WhenPontoNotFound_ShouldThrowNotFoundException() {
         UpdatePontoRequest request = new UpdatePontoRequest();
-        when(colaboradoresRepository.findById(99L)).thenReturn(Optional.empty());
+        when(pontoRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> pontoService.update(request, 99L));
+        verify(pontoRepository, never()).save(any(Ponto.class));
+    }
+
+    @Test
+    void update_WhenResponsavelNotFound_ShouldThrowNotFoundException() {
+        UpdatePontoRequest request = new UpdatePontoRequest();
+        request.setColaboradorIdUpdate(99L);
+
+        when(pontoRepository.findById(10L)).thenReturn(Optional.of(ponto));
+        when(colaboradoresRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> pontoService.update(request, 10L));
         verify(pontoRepository, never()).save(any(Ponto.class));
     }
 }

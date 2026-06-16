@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -19,14 +21,18 @@ public class Ponto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "id_colaborador")
     private Colaboradores colaboradorId;
+
+    @ManyToOne
+    @JoinColumn(name = "id_colaborador_updater")
     private Colaboradores colaboradorIdUpdate;
 
-    private LocalDateTime pontoCreate;
-    private LocalDateTime pontoUpdated;
+    private LocalDateTime ponto;
 
     @PrePersist
     protected void onCreate() {
-        pontoCreate = LocalDateTime.now();
+        ponto = LocalDateTime.now();
     }
 }

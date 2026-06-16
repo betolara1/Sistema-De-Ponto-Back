@@ -34,7 +34,7 @@ public class PontoController {
     @GetMapping
     public ResponseEntity<Page<PontoDTO>> getAll(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dateCreated") String sortBy,
+            @RequestParam(defaultValue = "ponto") String sortBy,
             @RequestParam(defaultValue = "desc") @NonNull String direction) {
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
 
@@ -46,34 +46,25 @@ public class PontoController {
         return ResponseEntity.ok(pontoService.findById(id));
     }
 
-    @GetMapping(params = "colabId")
-    public ResponseEntity<PontoDTO> getColaboradorId(@RequestParam Long id) {
-        return ResponseEntity.ok(pontoService.findByColaboradorId(id));
+    @GetMapping(params = "colaboradorId")
+    public ResponseEntity<PontoDTO> getColaboradorId(@RequestParam("colaboradorId") Long colaboradorId) {
+        return ResponseEntity.ok(pontoService.findByColaboradorId(colaboradorId));
     }
 
-    @GetMapping(params = "colabUpdater")
-    public ResponseEntity<PontoDTO> getColaboradorIdUpdater(@RequestParam Long id) {
+    @GetMapping(params = "colaboradorUpdater")
+    public ResponseEntity<PontoDTO> getColaboradorIdUpdater(@RequestParam("colaboradorUpdater") Long id) {
         return ResponseEntity.ok(pontoService.findByColaboradorIdUpdater(id));
     }
 
-    @GetMapping(params = "dateCreated")
+    @GetMapping(params = "ponto")
     public ResponseEntity<Page<PontoDTO>> getDateCreated(@RequestParam String dateString,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dateCreated") String sortBy,
-            @RequestParam(defaultValue = "desc") @NonNull String direction) {
+            @RequestParam(defaultValue = "ponto") String sortBy,
+            @RequestParam(defaultValue = "desc") @NonNull String direction
+    ){
         Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
         return ResponseEntity.ok(pontoService.getByPontoCreated(dateString, pageable));
-    }
-
-    @GetMapping(params = "dataUpdated")
-    public ResponseEntity<Page<PontoDTO>> getDateUpdated(@RequestParam String dateString,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dateCreated") String sortBy,
-            @RequestParam(defaultValue = "desc") @NonNull String direction) {
-        Pageable pageable = PaginationUtils.createPageable(page, size, sortBy, direction);
-        return ResponseEntity.ok(pontoService.getByPontoUpdated(dateString, pageable));
     }
 
     @PostMapping
@@ -84,8 +75,8 @@ public class PontoController {
         return ResponseEntity.status(HttpStatus.OK).body(pontoDTO);
     }
 
-    @PutMapping
-    public ResponseEntity<PontoDTO> updatePonto(@Valid @RequestBody UpdatePontoRequest request, Long id){
+    @PutMapping("/{id}")
+    public ResponseEntity<PontoDTO> updatePonto(@Valid @RequestBody UpdatePontoRequest request, @PathVariable Long id){
         Ponto ponto = pontoService.update(request, id);
         PontoDTO pontoDTO = new PontoDTO(ponto);
 

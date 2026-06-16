@@ -9,9 +9,9 @@ public record PontoDTO(
 ){
     public PontoDTO (Ponto ponto){
         this(
-            ponto.getColaboradorId().getId(),
-            ponto.getColaboradorIdUpdate().getId(),
-            ponto.getId()
+            ponto.getId(),
+            ponto.getColaboradorId() != null ? ponto.getColaboradorId().getId() : null, // para não retornar NullPointerException 
+            ponto.getColaboradorIdUpdate() != null ? ponto.getColaboradorIdUpdate().getId() : null // para não retornar NullPointerException 
         );
     }
 }

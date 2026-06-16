@@ -69,6 +69,7 @@ public class PontoControllerTest {
         pontoEntity.setId(10L);
         pontoEntity.setColaboradorId(colab);
         pontoEntity.setColaboradorIdUpdate(colabUpdate);
+        pontoEntity.setPonto(LocalDateTime.now());
     }
 
     @Test
@@ -79,7 +80,7 @@ public class PontoControllerTest {
         mockMvc.perform(get("/ponto")
                 .param("page", "0")
                 .param("size", "10")
-                .param("sortBy", "dateCreated")
+                .param("sortBy", "ponto")
                 .param("direction", "desc")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -104,8 +105,7 @@ public class PontoControllerTest {
         when(pontoService.findByColaboradorId(1L)).thenReturn(pontoDTO);
 
         mockMvc.perform(get("/ponto")
-                .param("colabId", "")
-                .param("id", "1")
+                .param("colaboradorId", "1")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.colaboradorId").value(1));
@@ -116,8 +116,7 @@ public class PontoControllerTest {
         when(pontoService.findByColaboradorIdUpdater(2L)).thenReturn(pontoDTO);
 
         mockMvc.perform(get("/ponto")
-                .param("colabUpdater", "")
-                .param("id", "2")
+                .param("colaboradorUpdater", "2")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.colaboradorIdUpdate").value(2));
@@ -129,20 +128,7 @@ public class PontoControllerTest {
         when(pontoService.getByPontoCreated(eq("2026-06-16"), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/ponto")
-                .param("dateCreated", "")
-                .param("dateString", "2026-06-16")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(10));
-    }
-
-    @Test
-    void getDateUpdated_ShouldReturnPageOfPontoDTO() throws Exception {
-        Page<PontoDTO> page = new PageImpl<>(Collections.singletonList(pontoDTO));
-        when(pontoService.getByPontoUpdated(eq("2026-06-16"), any(Pageable.class))).thenReturn(page);
-
-        mockMvc.perform(get("/ponto")
-                .param("dataUpdated", "")
+                .param("ponto", "")
                 .param("dateString", "2026-06-16")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -160,30 +146,25 @@ public class PontoControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                // new PontoDTO(pontoEntity) will result in:
-                // id = colab.getId() -> 1
-                // colaboradorId = colabUpdate.getId() -> 2
-                // colaboradorIdUpdate = pontoEntity.getId() -> 10
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.colaboradorId").value(2))
-                .andExpect(jsonPath("$.colaboradorIdUpdate").value(10));
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.colaboradorId").value(1))
+                .andExpect(jsonPath("$.colaboradorIdUpdate").value(2));
     }
 
     @Test
     void updatePonto_ShouldReturnPontoDTO() throws Exception {
         UpdatePontoRequest request = new UpdatePontoRequest();
         request.setColaboradorIdUpdate(2L);
-        request.setPontoUpdated(LocalDateTime.now());
+        request.setPonto(LocalDateTime.now());
 
-        when(pontoService.update(any(UpdatePontoRequest.class), eq(1L))).thenReturn(pontoEntity);
+        when(pontoService.update(any(UpdatePontoRequest.class), eq(10L))).thenReturn(pontoEntity);
 
-        mockMvc.perform(put("/ponto")
-                .param("id", "1")
+        mockMvc.perform(put("/ponto/{id}", 10L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.colaboradorId").value(2))
-                .andExpect(jsonPath("$.colaboradorIdUpdate").value(10));
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.colaboradorId").value(1))
+                .andExpect(jsonPath("$.colaboradorIdUpdate").value(2));
     }
 }

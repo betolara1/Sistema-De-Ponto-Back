@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import org.jvnet.hk2.annotations.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import betolara1.Ponto.dto.PontoDTO;
@@ -47,14 +47,14 @@ public class PontoService {
 
     @Transactional(readOnly = true)
     public PontoDTO findByColaboradorId(Long id){
-        Ponto ponto = pontoRepository.findByColaboradorId(id).orElseThrow(() -> new NotFoundException("ID do colaborador não encontrado. "));
+        Ponto ponto = pontoRepository.findByColaboradorId_Id(id).orElseThrow(() -> new NotFoundException("ID do colaborador não encontrado. "));
     
         return new PontoDTO(ponto);
     }
 
     @Transactional(readOnly = true)
     public PontoDTO findByColaboradorIdUpdater(Long id){
-        Ponto ponto = pontoRepository.findByColaboradorUpdate(id).orElseThrow(() -> new NotFoundException("ID do responsável não localizado. "));
+        Ponto ponto = pontoRepository.findByColaboradorIdUpdate_Id(id).orElseThrow(() -> new NotFoundException("ID do responsável não localizado. "));
         
         return new PontoDTO(ponto);
     }
@@ -70,35 +70,13 @@ public class PontoService {
         LocalDateTime endDay = date.atTime(LocalTime.MAX);
 
         // 3. Chama o repositório com o intervalo
-        Page<Ponto> ponto = pontoRepository.findByDateCreatedBetween(startDay, endDay, pageable);
+        Page<Ponto> ponto = pontoRepository.findByPontoBetween(startDay, endDay, pageable);
 
         // 4. Verifica se algum módulo pai foi encontrado
         if(ponto.isEmpty()){
             throw new NotFoundException("Nenhum tamanho encontrado na data: " + dateString);
         }
 
-        // 5. Retorna os módulos pais
-        return ponto.map(PontoDTO::new);
-    }
-
-    // Método para buscar produtos por data de atualização
-    @Transactional(readOnly = true)
-    public Page<PontoDTO> getByPontoUpdated(String dateString, Pageable pageable){
-        // 1. Converte a String para LocalDate (apenas data)
-        LocalDate date = DateUtils.parseDate(dateString);
-
-        // 2. Cria o início do dia (00:00:00) e o fim do dia (23:59:59)
-        LocalDateTime startDay = date.atStartOfDay();
-        LocalDateTime endDay = date.atTime(LocalTime.MAX);
-
-        // 3. Chama o repositório com o intervalo
-        Page<Ponto> ponto = pontoRepository.findByDateUpdatedBetween(startDay, endDay, pageable);
-
-        // 4. Verifica se algum módulo pai foi encontrado
-        if(ponto.isEmpty()){
-            throw new NotFoundException("Nenhum tamanho encontrado na data: " + dateString);
-        }
-        
         // 5. Retorna os módulos pais
         return ponto.map(PontoDTO::new);
     }
@@ -118,21 +96,17 @@ public class PontoService {
     }
 
     @Transactional
-    public Ponto update(UpdatePontoRequest request, Long id){
-        Ponto ponto = new Ponto();
+    public Ponto update(UpdatePontoRequest request, Long idPonto){
+        Ponto ponto = pontoRepository.findById(idPonto).orElseThrow(() -> new NotFoundException("Ponto não encontrado."));
 
-        Colaboradores colab = colaboradoresRepository.findById(id).orElseThrow(() -> new NotFoundException("Colaborador não encontrado. "));
+        Colaboradores responsavel = colaboradoresRepository.findById(request.getColaboradorIdUpdate()).orElseThrow(() -> new NotFoundException("Responsável pela alteração não encontrado."));
+            
+        ponto.setColaboradorIdUpdate(responsavel);
 
-        if(request.getColaboradorIdUpdate() != null){
-            ponto.setColaboradorIdUpdate(colab);
-        }
-
-        if(request.getPontoUpdated() != null){
-            ponto.setPontoUpdated(request.getPontoUpdated());
-        }
+        ponto.setPonto(request.getPonto());
 
         Ponto update = pontoRepository.save(ponto);
-        log.info("Ponto do colaborador {} foi alterado.", colab.getNomeColaborador());
+        log.info("Ponto de ID {} foi alterado pelo responsável {}.", ponto.getId(), responsavel.getNomeColaborador());
 
         return update;
     }
