@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
@@ -53,8 +54,8 @@ public class CoordenadasControllerTest {
     void setUp() {
         coordenadasDTO = new CoordenadasDTO(
             10L,
-            "-23.55052",
-            "-46.633308",
+            new BigDecimal("-23.55052"),
+            new BigDecimal("-46.633308"),
             1L,
             LocalDateTime.now(),
             LocalDateTime.now()
@@ -73,7 +74,7 @@ public class CoordenadasControllerTest {
                 .param("direction", "desc")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].latitude").value("-23.55052"))
+                .andExpect(jsonPath("$.content[0].latitude").value(-23.55052))
                 .andExpect(jsonPath("$.content[0].empresaId").value(1L));
     }
 
@@ -84,7 +85,7 @@ public class CoordenadasControllerTest {
         mockMvc.perform(get("/coordenadas/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.latitude").value("-23.55052"))
+                .andExpect(jsonPath("$.latitude").value(-23.55052))
                 .andExpect(jsonPath("$.empresaId").value(1L));
     }
 
@@ -100,8 +101,8 @@ public class CoordenadasControllerTest {
 
         Coordenadas savedCoordenadas = new Coordenadas();
         savedCoordenadas.setId(10L);
-        savedCoordenadas.setLatitude("-23.55052");
-        savedCoordenadas.setLongitude("-46.633308");
+        savedCoordenadas.setLatitude(new BigDecimal("-23.55052"));
+        savedCoordenadas.setLongitude(new BigDecimal("-46.633308"));
         savedCoordenadas.setEmpresaId(empresa);
 
         when(coordenadasService.save(any(SaveCoordenadasRequest.class))).thenReturn(savedCoordenadas);
@@ -111,22 +112,22 @@ public class CoordenadasControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(10L))
-                .andExpect(jsonPath("$.latitude").value("-23.55052"))
+                .andExpect(jsonPath("$.latitude").value(-23.55052))
                 .andExpect(jsonPath("$.empresaId").value(1L));
     }
 
     @Test
     void updateCoordenadas_ShouldReturnCoordenadasDTO() throws Exception {
         UpdateCoordenadasRequest request = new UpdateCoordenadasRequest();
-        request.setLatitude("-25.4284");
+        request.setLatitude(new BigDecimal("-25.4284"));
 
         Empresa empresa = new Empresa();
         empresa.setId(1L);
 
         Coordenadas updatedCoordenadas = new Coordenadas();
         updatedCoordenadas.setId(10L);
-        updatedCoordenadas.setLatitude("-25.4284");
-        updatedCoordenadas.setLongitude("-46.633308");
+        updatedCoordenadas.setLatitude(new BigDecimal("-25.4284"));
+        updatedCoordenadas.setLongitude(new BigDecimal("-46.633308"));
         updatedCoordenadas.setEmpresaId(empresa);
 
         when(coordenadasService.update(any(UpdateCoordenadasRequest.class), eq(10L))).thenReturn(updatedCoordenadas);
@@ -135,7 +136,7 @@ public class CoordenadasControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.latitude").value("-25.4284"))
+                .andExpect(jsonPath("$.latitude").value(-25.4284))
                 .andExpect(jsonPath("$.empresaId").value(1L));
     }
 }

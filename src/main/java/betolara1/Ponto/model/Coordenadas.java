@@ -1,5 +1,6 @@
 package betolara1.Ponto.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -20,8 +21,8 @@ public class Coordenadas {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String latitude;
-    private String longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     @OneToOne
     @JoinColumn(name = "id_empresa")

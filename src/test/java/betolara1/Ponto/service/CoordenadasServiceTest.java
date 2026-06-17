@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -51,8 +52,8 @@ public class CoordenadasServiceTest {
 
         coordenadas = new Coordenadas();
         coordenadas.setId(10L);
-        coordenadas.setLatitude("-23.55052");
-        coordenadas.setLongitude("-46.633308");
+        coordenadas.setLatitude(new BigDecimal("-23.55052"));
+        coordenadas.setLongitude(new BigDecimal("-46.633308"));
         coordenadas.setEmpresaId(empresa);
         coordenadas.setDateCreated(LocalDateTime.now());
         coordenadas.setDateUpdated(LocalDateTime.now());
@@ -69,7 +70,7 @@ public class CoordenadasServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals("-23.55052", result.getContent().get(0).latitude());
+        assertEquals(new BigDecimal("-23.55052"), result.getContent().get(0).latitude());
         assertEquals(1L, result.getContent().get(0).empresaId());
         verify(coordenadasRepository, times(1)).findAll(pageable);
     }
@@ -89,7 +90,7 @@ public class CoordenadasServiceTest {
         CoordenadasDTO result = coordenadasService.findByEmpresaId(1L);
 
         assertNotNull(result);
-        assertEquals("-23.55052", result.latitude());
+        assertEquals(new BigDecimal("-23.55052"), result.latitude());
         assertEquals(1L, result.empresaId());
         verify(coordenadasRepository, times(1)).findByEmpresaIdId(1L);
     }
@@ -110,8 +111,8 @@ public class CoordenadasServiceTest {
 
         Coordenadas savedCoordenadas = new Coordenadas();
         savedCoordenadas.setId(11L);
-        savedCoordenadas.setLatitude(request.getLatitude());
-        savedCoordenadas.setLongitude(request.getLongitude());
+        savedCoordenadas.setLatitude(new BigDecimal(request.getLatitude()));
+        savedCoordenadas.setLongitude(new BigDecimal(request.getLongitude()));
         savedCoordenadas.setEmpresaId(empresa);
 
         when(empresaRepository.findById(1L)).thenReturn(Optional.of(empresa));
@@ -121,7 +122,7 @@ public class CoordenadasServiceTest {
 
         assertNotNull(result);
         assertEquals(11L, result.getId());
-        assertEquals("-22.9068", result.getLatitude());
+        assertEquals(new BigDecimal("-22.9068"), result.getLatitude());
         assertEquals(empresa, result.getEmpresaId());
         verify(empresaRepository, times(1)).findById(1L);
         verify(coordenadasRepository, times(1)).save(any(Coordenadas.class));
@@ -141,8 +142,8 @@ public class CoordenadasServiceTest {
     @Test
     void update_ShouldUpdateAndReturnCoordenadas() {
         UpdateCoordenadasRequest request = new UpdateCoordenadasRequest();
-        request.setLatitude("-25.4284");
-        request.setLongitude("-49.2733");
+        request.setLatitude(new BigDecimal("-25.4284"));
+        request.setLongitude(new BigDecimal("-49.2733"));
         request.setEmpresaId(1L);
 
         Coordenadas updatedCoordenadas = new Coordenadas();
@@ -158,7 +159,7 @@ public class CoordenadasServiceTest {
         Coordenadas result = coordenadasService.update(request, 10L);
 
         assertNotNull(result);
-        assertEquals("-25.4284", result.getLatitude());
+        assertEquals(new BigDecimal("-25.4284"), result.getLatitude());
         assertEquals(empresa, result.getEmpresaId());
         verify(coordenadasRepository, times(1)).findById(10L);
         verify(empresaRepository, times(1)).findById(1L);

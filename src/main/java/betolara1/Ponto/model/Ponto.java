@@ -26,7 +26,7 @@ public class Ponto {
     private Colaboradores colaboradorId;
 
     @ManyToOne
-    @JoinColumn(name = "id_colaborador_updater")
+    @JoinColumn(name = "id_responsavel")
     private Colaboradores colaboradorIdUpdate;
 
     private LocalDateTime ponto;

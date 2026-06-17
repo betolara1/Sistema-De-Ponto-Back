@@ -1,5 +1,7 @@
 package betolara1.Ponto.service;
 
+import java.math.BigDecimal;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -54,8 +56,8 @@ public class CoordenadasService {
 
         Empresa empresaId = empresaRepository.findById(request.getEmpresaId()).orElseThrow(() -> new NotFoundException("O ID:" +request.getEmpresaId()+ " da Empresa não foi encontrado "));
 
-        coord.setLatitude(request.getLatitude());
-        coord.setLongitude(request.getLongitude());
+        coord.setLatitude(new BigDecimal(request.getLatitude()));
+        coord.setLongitude(new BigDecimal(request.getLongitude()));
         coord.setEmpresaId(empresaId);
 
         Coordenadas saved = coordenadasRepository.save(coord);

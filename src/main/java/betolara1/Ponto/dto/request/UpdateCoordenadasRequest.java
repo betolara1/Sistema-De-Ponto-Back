@@ -1,10 +1,12 @@
 package betolara1.Ponto.dto.request;
 
+import java.math.BigDecimal;
+
 import lombok.Data;
 
 @Data
 public class UpdateCoordenadasRequest {
-    private String latitude;
-    private String longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private Long empresaId;
 }

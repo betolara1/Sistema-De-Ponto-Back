@@ -1,13 +1,14 @@
 package betolara1.Ponto.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import betolara1.Ponto.model.Coordenadas;
 
 public record CoordenadasDTO(
     Long id,
-    String latitude,
-    String longitude,
+    BigDecimal latitude,
+    BigDecimal longitude,
 
     Long empresaId,
 

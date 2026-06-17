@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -23,8 +22,7 @@ public class Fotos {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Lob
-    @Column(name = "foto", columnDefinition = "BLOB")
+    @Column(name = "foto")
     private byte[] foto;
 
     @OneToOne
