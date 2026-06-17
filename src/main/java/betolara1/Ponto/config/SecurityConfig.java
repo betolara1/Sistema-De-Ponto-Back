@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/empresa", "/colaboradores").permitAll()
                         .requestMatchers("/actuator/**").authenticated()
                         .anyRequest().authenticated() // OUTROS METODOS (PUT, POST, DELETE) REQUER AUTENTICAÇÃO DE TOKEN
                 )
