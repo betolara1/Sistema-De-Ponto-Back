@@ -13,11 +13,14 @@ O projeto é estruturado utilizando as seguintes tecnologias e frameworks:
 - **Linguagem:** [Java 21](https://www.oracle.com/java/technologies/downloads/)
 - **Framework Principal:** [Spring Boot 3.5.14](https://spring.io/projects/spring-boot)
 - **Banco de Dados & Persistência:**
+  - [PostgreSQL](https://www.postgresql.org/) (SGBD Relacional utilizado em ambiente local/produção)
   - Spring Data JPA (Hibernate)
   - [Flyway Migration](https://flywaydb.org/) (Para controle de versão e evolução do esquema do banco de dados)
 - **Segurança & Autenticação:**
   - Spring Security
   - `JWT-Package` (Biblioteca interna personalizada para gerenciamento e validação de tokens JWT)
+- **Cache & Performance:**
+  - Spring Cache (Ativado com `@EnableCaching` para otimização de consultas repetitivas)
 - **Arquitetura & Nuvem:**
   - Spring Cloud (Eureka Discovery Client/Server para registro de serviços)
   - Resilience4j (Circuit Breaker para resiliência e tolerância a falhas)
@@ -33,19 +36,19 @@ O projeto é estruturado utilizando as seguintes tecnologias e frameworks:
 
 O código-fonte principal está organizado dentro de `src/main/java/betolara1/Ponto`:
 
-- 📂 **`config/`**: Configurações gerais da aplicação (CORS, Segurança/Spring Security, Swagger/OpenAPI).
+- 📂 **`config/`**: Configurações gerais da aplicação (CORS, Segurança/Spring Security, Swagger/OpenAPI, Cache).
 - 📂 **`controller/`**: Controladores REST responsáveis por expor os endpoints HTTP.
 - 📂 **`dto/`**: Objetos de Transferência de Dados (Requests e Responses personalizados).
-- 📂 **`model/`**: Entidades persistentes mapeadas com JPA (representação das tabelas do banco).
+- 📂 **`model/`**: Entidades persistentes mapeadas com JPA (representação das tabelas do banco de dados).
 - 📂 **`repository/`**: Interfaces Spring Data JPA para operações de CRUD e consultas personalizadas.
 - 📂 **`service/`**: Classes de serviço contendo a regra de negócio da aplicação.
 - 📂 **`utils/`**: Utilitários gerais do sistema (ex: paginação e helpers).
 
 ---
 
-## 🔐 Configuração de Segurança (JWT)
+## ⚙️ Configurações do Sistema (`application.properties`)
 
-A autenticação é baseada em tokens JWT. As principais propriedades devem ser configuradas no arquivo [application.properties](file:///c:/Users/Ralf/Desktop/Programa%C3%A7%C3%A3o/SistemaPonto/Back/src/main/resources/application.properties):
+As principais propriedades de ambiente da aplicação devem ser configuradas no arquivo [application.properties](file:///c:/Users/Ralf/Desktop/Programação/SistemaPonto/Back/src/main/resources/application.properties):
 
 ```properties
 # Nome do microsserviço
@@ -59,6 +62,19 @@ jwt.expiration-time=43200000
 
 # Rotas públicas que não exigem Token de Autenticação
 jwt.excluded-paths=/auth/login, /public/**, /swagger-ui/**
+
+# Configurações de Conexão com o Banco de Dados (PostgreSQL)
+spring.datasource.url=jdbc:postgresql://localhost:5432/sistema_ponto
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Configuração do Flyway
+spring.flyway.enabled=true
+spring.flyway.baseline-on-migrate=true
+
+# Validação automática de esquema pelo Hibernate (sem auto-update para uso com Flyway)
+spring.jpa.hibernate.ddl-auto=validate
 ```
 
 ---
@@ -69,7 +85,7 @@ jwt.excluded-paths=/auth/login, /public/**, /swagger-ui/**
 
 1. **Java SDK 21** ou superior instalado e configurado nas variáveis de ambiente (`JAVA_HOME`).
 2. **Maven 3.x** instalado (ou utilize o wrapper `./mvnw` incluso no repositório).
-3. Banco de dados configurado (conforme necessário nas variáveis de ambiente ou arquivo `application.properties`).
+3. Banco de dados PostgreSQL rodando localmente com a base configurada.
 
 ### Passo a Passo
 
@@ -109,20 +125,26 @@ Com o servidor rodando, você pode visualizar e interagir com todos os endpoints
 
 Os seguintes recursos e seus respectivos endpoints estão disponíveis:
 
+### 🔐 Autenticação (`/auth`)
+
+| Método | Endpoint | Descrição | Parâmetros de Query / Path |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/auth/login` | Realiza a autenticação de um colaborador por CPF e senha, retornando um token JWT. | JSON Body (`LoginDTO`) |
+
 ### 🏢 Empresas (`/empresa`)
 
 | Método | Endpoint | Descrição | Parâmetros de Query / Path |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/empresa` | Retorna lista de empresas paginada e ordenada. | `page` (padrão 0), `size` (padrão 10), `sortBy` (padrão `dateCreated`), `direction` (padrão `desc`) |
 | **GET** | `/empresa/{id}` | Busca os detalhes de uma empresa específica por ID. | `{id}` (Path variable) |
-| **GET** | `/empresa?active={isActive}` | Lista empresas ativas ou inativas com paginação. | `isActive` (Boolean), `page`, `size`, `sortBy`, `direction` |
-| **GET** | `/empresa?dateCreated={dateString}` | Lista empresas pela data de criação. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
-| **GET** | `/empresa?dataUpdated={dateString}` | Lista empresas pela data de atualização. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/empresa?active={active}` | Lista empresas ativas ou inativas com paginação. | `active` (Boolean), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/empresa?dateCreated={dateCreated}` | Lista empresas pela data de criação. | `dateCreated` (String), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/empresa?dataUpdated={dataUpdated}` | Lista empresas pela data de atualização. | `dataUpdated` (String), `page`, `size`, `sortBy`, `direction` |
 | **GET** | `/empresa?nome={nome}` | Busca uma empresa pelo nome exato. | `nome` (String) |
 | **GET** | `/empresa?cnpj={cnpj}` | Busca uma empresa pelo CNPJ. | `cnpj` (String) |
-| **POST** | `/empresa` | Cadastra uma nova empresa no sistema. | JSON Body (`SaveEmpresaRequest`) |
-| **PUT** | `/empresa/{id}` | Atualiza os dados de uma empresa existente. | JSON Body (`UpdateEmpresaRequest`), `{id}` |
-| **DELETE**| `/empresa/{id}` | Desativa temporariamente (Soft Delete) ou remove uma empresa. | `{id}` |
+| **POST** | `/empresa` | Cadastra uma nova empresa no sistema. *(Rota pública para onboarding/registro)* | JSON Body (`SaveEmpresaRequest`) |
+| **PUT** | `/empresa/{id}` | Atualiza os dados de uma empresa existente. | JSON Body (`UpdateEmpresaRequest`), `{id}` (Path variable) |
+| **DELETE**| `/empresa/{id}` | Desativa temporariamente (Soft Delete) ou remove uma empresa. | `{id}` (Path variable) |
 
 ### 📍 Coordenadas Geográficas (`/coordenadas`)
 
@@ -137,7 +159,7 @@ Permite definir limites e localizações geográficas para as empresas. *Observa
 
 ### 👥 Colaboradores (`/colaboradores`)
 
-Permite o gerenciamento de funcionários (colaboradores) e suas respectivas associações a empresas do sistema.
+Permite o gerenciamento de funcionários (colaboradores), suas respectivas associações a empresas e credenciais de login.
 
 | Método | Endpoint | Descrição | Parâmetros de Query / Path |
 | :--- | :--- | :--- | :--- |
@@ -146,18 +168,44 @@ Permite o gerenciamento de funcionários (colaboradores) e suas respectivas asso
 | **GET** | `/colaboradores?nome={nome}` | Busca um colaborador por parte do nome (case-insensitive). | `nome` (String) |
 | **GET** | `/colaboradores?cpf={cpf}` | Busca um colaborador pelo CPF exato. | `cpf` (String) |
 | **GET** | `/colaboradores?empresaId={empresaId}` | Busca colaborador vinculado a um ID de empresa. | `empresaId` (Long) |
-| **GET** | `/colaboradores?active={isActive}&isActive={isActive}` | Lista colaboradores ativos ou inativos de forma paginada. | `isActive` (Boolean), `page`, `size`, `sortBy`, `direction` |
-| **GET** | `/colaboradores?dateCreated={dateString}` | Lista colaboradores pela data de criação. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
-| **GET** | `/colaboradores?dataUpdated={dateString}` | Lista colaboradores pela data de atualização. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
-| **POST** | `/colaboradores` | Cadastra um novo colaborador no sistema. | JSON Body (`SaveColaboradoresRequest`) |
-| **PUT** | `/colaboradores?id={id}` | Atualiza os dados cadastrais de um colaborador existente. | JSON Body (`UpdateColaboradoresRequest`), `id` (Query param) |
+| **GET** | `/colaboradores?active={active}` | Lista colaboradores ativos ou inativos de forma paginada. | `active` (Boolean), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/colaboradores?dateCreated={dateCreated}` | Lista colaboradores pela data de criação. | `dateCreated` (String), `page`, `size`, `sortBy`, `direction` |
+| **GET** | `/colaboradores?dataUpdated={dataUpdated}` | Lista colaboradores pela data de atualização. | `dataUpdated` (String), `page`, `size`, `sortBy`, `direction` |
+| **POST** | `/colaboradores` | Cadastra um novo colaborador no sistema. *(Rota pública para registro)* | JSON Body (`SaveColaboradoresRequest`) |
+| **PUT** | `/colaboradores/{id}` | Atualiza os dados cadastrais de um colaborador existente. | JSON Body (`UpdateColaboradoresRequest`), `{id}` (Path variable) |
 | **DELETE**| `/colaboradores/{id}` | Desativa temporariamente um colaborador (Soft Delete). | `{id}` (Path variable) |
+
+### ⏰ Registro de Ponto (`/ponto`)
+
+Gerenciamento de registros de entradas, saídas, intervalos e correções de marcações de ponto.
+
+| Método | Endpoint | Descrição | Parâmetros de Query / Path |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/ponto` | Retorna lista de registros de ponto paginada e ordenada. | `page` (padrão 0), `size` (padrão 10), `sortBy` (padrão `ponto`), `direction` (padrão `desc`) |
+| **GET** | `/ponto/{id}` | Busca registro de ponto específico por ID. | `{id}` (Path variable) |
+| **GET** | `/ponto?colaboradorId={colaboradorId}` | Busca registros de ponto por ID do colaborador. | `colaboradorId` (Long) |
+| **GET** | `/ponto?colaboradorUpdater={colaboradorUpdater}` | Busca registros de ponto por ID do colaborador que realizou a última atualização/correção. | `colaboradorUpdater` (Long) |
+| **GET** | `/ponto?ponto={dateString}` | Lista registros de ponto pela data de criação. | `dateString` (String), `page`, `size`, `sortBy`, `direction` |
+| **POST** | `/ponto` | Cadastra um novo registro de ponto. | JSON Body (`SavePontoRequest`) |
+| **PUT** | `/ponto/{id}` | Atualiza/corrige um registro de ponto por ID. | JSON Body (`UpdatePontoRequest`), `{id}` (Path variable) |
+
+### 📸 Fotos dos Colaboradores (`/fotos`)
+
+Gerenciamento de imagens de perfil ou fotos de validação biométrica dos colaboradores.
+
+| Método | Endpoint | Descrição | Parâmetros de Query / Path |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/fotos` | Retorna lista de fotos paginada e ordenada. | `page` (padrão 0), `size` (padrão 10), `sortBy` (padrão `dateCreated`), `direction` (padrão `desc`) |
+| **GET** | `/fotos/{id}` | Busca a foto por ID. | `{id}` (Path variable) |
+| **GET** | `/fotos?colaboradorId={colaboradorId}` | Busca a foto vinculada a um colaborador específico por ID. | `colaboradorId` (Long) |
+| **POST** | `/fotos` | Cadastra/associa uma nova foto de colaborador. | JSON Body (`SaveFotosRequest`) |
+| **PUT** | `/fotos/{id}` | Atualiza uma foto de colaborador existente por ID. | JSON Body (`UpdateFotosRequest`), `{id}` (Path variable) |
 
 ---
 
 ## 🧪 Execução de Testes
 
-O projeto conta com testes unitários e de integração abrangentes para as camadas de Service e Controller dos recursos `Empresa`, `Coordenadas` e `Colaboradores`.
+O projeto conta com testes unitários e de integração abrangentes para as camadas de Service e Controller dos recursos `Empresa`, `Coordenadas`, `Colaboradores`, `Ponto` e `Fotos`.
 
 Para rodar todos os testes automatizados da aplicação:
 
@@ -171,9 +219,10 @@ Para rodar todos os testes automatizados da aplicação:
 
 ## 📋 Próximos Passos (Roadmap de Desenvolvimento)
 
-- [ ] Criar scripts iniciais de migração de banco de dados (`V1__create_tables.sql`) em `src/main/resources/db/migration`.
+- [x] Criar scripts iniciais de migração de banco de dados (`V1__criar_tabelas.sql`) em `src/main/resources/db/migration`.
 - [x] Implementar a entidade de `Colaborador` (Funcionários) e seus respectivos endpoints e testes.
-- [ ] Implementar a lógica de registro de ponto (entradas, saídas, intervalos).
-- [ ] Configurar conexão dedicada a banco de dados em produção (PostgreSQL/MySQL).
+- [x] Implementar a lógica de registro de ponto (entradas, saídas, intervalos, correções).
+- [x] Configurar conexão dedicada a banco de dados local/produção (PostgreSQL).
+- [x] Implementar a entidade de `Fotos` dos colaboradores e seus respectivos endpoints e testes.
+- [x] Integrar Cache (`Spring Cache` com `@EnableCaching`).
 - [ ] Conectar ao Eureka Server de registro de microsserviços.
-

@@ -37,6 +37,9 @@ public class ColaboradoresServiceTest {
     @Mock
     private EmpresaRepository empresaRepository;
 
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private ColaboradoresService colaboradoresService;
 
@@ -230,6 +233,7 @@ public class ColaboradoresServiceTest {
         request.setIsActive(true);
 
         when(empresaRepository.findById(1L)).thenReturn(Optional.of(empresa));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(colaboradoresRepository.save(any(Colaboradores.class))).thenReturn(colab);
 
         Colaboradores result = colaboradoresService.save(request);
