@@ -3,6 +3,7 @@ package betolara1.Ponto.service;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,10 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ColaboradoresService {
     private final ColaboradoresRepository colaboradoresRepository;
     private final EmpresaRepository empresaRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public ColaboradoresService(ColaboradoresRepository colaboradoresRepository, EmpresaRepository empresaRepository){
+    public ColaboradoresService(ColaboradoresRepository colaboradoresRepository, EmpresaRepository empresaRepository, PasswordEncoder passwordEncoder){
         this.colaboradoresRepository = colaboradoresRepository;
         this.empresaRepository = empresaRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -144,7 +147,7 @@ public class ColaboradoresService {
         colab.setEmpresaId(empresaId);
         colab.setIsActive(request.getIsActive());
         colab.setNomeColaborador(request.getNomeColaborador());
-        colab.setSenha(request.getSenha());
+        colab.setSenha(passwordEncoder.encode(request.getSenha()));
 
         Colaboradores save = colaboradoresRepository.save(colab);
         log.info("Colaborador salvo com sucesso");
@@ -177,8 +180,8 @@ public class ColaboradoresService {
             colab.setNomeColaborador(request.getNomeColaborador());
         }
 
-        if(request.getSenha() != null){
-            colab.setSenha(request.getSenha());
+        if (request.getSenha() != null) {
+            colab.setSenha(passwordEncoder.encode(request.getSenha())); // <-- Criptografa aqui
         }
 
         Colaboradores update = colaboradoresRepository.save(colab);
