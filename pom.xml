@@ -98,7 +98,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.betolara1</groupId>
+			<groupId>com.github.betolara1</groupId>
 			<artifactId>JWT-Package</artifactId>
 			<version>1.0.4</version> <!-- Substitua pela versão atual -->
 		</dependency>
@@ -113,6 +113,14 @@
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Serviço 1: Banco de Dados PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: ponto-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: sistema_ponto
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ponto-network
+
+  # Serviço 2: Sua aplicação Java (Spring Boot)
+  api:
+    build: .
+    container_name: ponto-api
+    ports:
+      - "8080:8080"
+    environment:
+      # Aponta para o serviço "db" em vez de "localhost"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sistema_ponto
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      # Seus dados de variáveis JWT (se necessário)
+      JWT_SECRET_KEY: minha_chave_secreta_super_longa_e_segura_32_chars
+      EUREKA_CLIENT_ENABLED: "false" 
+    depends_on:
+      - db
+    networks:
+      - ponto-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ponto-network:
+    driver: bridge
