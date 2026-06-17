@@ -36,7 +36,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO request) {
-        Optional<Colaboradores> colab = colaboradoresRepository.findByCpfContainingIgnoreCase(request.cpf());
+        Optional<Colaboradores> colab = colaboradoresRepository.findByCpf(request.cpf());
         
         if(colab.isPresent()){
             Colaboradores colaborador = colab.get();

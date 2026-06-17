@@ -22,6 +22,8 @@ public interface ColaboradoresRepository extends JpaRepository<Colaboradores, Lo
 
     Optional<Colaboradores> findByCpfContainingIgnoreCase(String cpf);
 
+    Optional<Colaboradores> findByCpf(String cpf);
+
     Optional<Colaboradores> findByEmpresaId_Id(Long empresaId);
 
     Page<Colaboradores> findByIsActive(Boolean isActive, Pageable pageable);
