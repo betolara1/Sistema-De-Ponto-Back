@@ -203,6 +203,116 @@ Gerenciamento de imagens de perfil ou fotos de validação biométrica dos colab
 
 ---
 
+## 🔌 Como Consumir a API (Guia de Integração)
+
+Esta seção descreve como integrar e consumir os endpoints da API do **Sistema de Ponto** de forma externa.
+
+### 1. Autenticação e Token JWT
+A maioria dos endpoints da API é protegida e exige autenticação por meio de um token JWT. Apenas as rotas de login (`/auth/login`) e os cadastros iniciais (`POST /empresa` e `POST /colaboradores`) são públicos.
+
+Para obter o token, envie uma requisição `POST` para `/auth/login` com o CPF e Senha:
+
+- **Endpoint:** `POST` `/auth/login`
+- **Cabeçalhos:** `Content-Type: application/json`
+- **Corpo da Requisição (JSON):**
+  ```json
+  {
+    "cpf": "12345678900",
+    "password": "sua_senha_segura"
+  }
+  ```
+- **Resposta de Sucesso (200 OK):**
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+
+---
+
+### 2. Enviando Requisições para Rotas Protegidas
+Com o token em mãos, inclua-o no cabeçalho **`Authorization`** no formato **`Bearer <token>`** para todas as outras requisições (como registrar ponto, consultar colaboradores, etc.).
+
+- **Exemplo de Cabeçalho:**
+  ```http
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
+
+---
+
+### 3. Exemplos Práticos de Consumo
+
+#### Exemplo com `cURL` (Linha de Comando)
+
+1. **Obter Token de Autenticação:**
+   ```bash
+   curl -X POST http://localhost:8080/auth/login \
+        -H "Content-Type: application/json" \
+        -d '{"cpf": "12345678900", "password": "sua_senha_segura"}'
+   ```
+
+2. **Registrar um Ponto (Rota Protegida):**
+   ```bash
+   curl -X POST http://localhost:8080/ponto \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer <INSIRA_O_TOKEN_AQUI>" \
+        -d '{"colaboradorId": 1}'
+   ```
+
+#### Exemplo com JavaScript (Fetch API)
+
+```javascript
+const API_URL = 'http://localhost:8080';
+
+// 1. Obter o Token JWT
+async function login(cpf, password) {
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cpf, password })
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha na autenticação');
+  }
+
+  const data = await response.json();
+  return data.token; // Token JWT
+}
+
+// 2. Registrar Ponto usando o Token
+async function registrarPonto(token, colaboradorId) {
+  const response = await fetch(`${API_URL}/ponto`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ colaboradorId })
+  });
+
+  if (!response.ok) {
+    const errorMsg = await response.text();
+    throw new Error(`Erro ao registrar ponto: ${errorMsg}`);
+  }
+
+  const result = await response.json();
+  console.log('Ponto registrado com sucesso:', result);
+}
+
+// Fluxo completo
+(async () => {
+  try {
+    const token = await login('12345678900', 'senha123');
+    await registrarPonto(token, 1);
+  } catch (error) {
+    console.error('Erro:', error.message);
+  }
+})();
+```
+
+---
+
 ## 🧪 Execução de Testes
 
 O projeto conta com testes unitários e de integração abrangentes para as camadas de Service e Controller dos recursos `Empresa`, `Coordenadas`, `Colaboradores`, `Ponto` e `Fotos`.
